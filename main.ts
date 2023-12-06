@@ -92,8 +92,12 @@ client.on(["callbackQuery", "inlineMessageId"], async (ctx) => {
     ctx.callbackQuery.inlineMessageId,
   ]);
   if (value != null) {
-    const { whisper, username } = value;
-    if (ctx.from.username !== username && !ctx.from.also?.includes(username)) {
+    let { whisper, username } = value;
+    username = username.toLowerCase();
+    if (
+      ctx.from.username?.toLowerCase() !== username &&
+      !ctx.from.also?.map((v) => v.toLowerCase()).includes(username)
+    ) {
       await ctx.answerCallbackQuery({
         text: "This is not for you.",
         alert: true,
