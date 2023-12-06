@@ -1,5 +1,8 @@
-import { Client, StorageLocalStorage } from "../MTKruto/mod.ts";
-import { getUsername } from "../MTKruto/client/0_utilities.ts";
+import {
+  Client,
+  StorageLocalStorage,
+} from "https://deno.land/x/mtkruto@0.1.123/mod.ts";
+import { getUsername } from "https://deno.land/x/mtkruto@0.1.123/client/0_utilities.ts";
 import env from "./env.ts";
 
 const kv = await Deno.openKv(env.KV_PATH == "" ? undefined : env.KV_PATH);
