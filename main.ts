@@ -1,6 +1,7 @@
 import {
   Client,
   StorageLocalStorage,
+  User,
 } from "https://deno.land/x/mtkruto@0.1.123/mod.ts";
 import { getUsername } from "https://deno.land/x/mtkruto@0.1.123/client/0_utilities.ts";
 import env from "./env.ts";
@@ -74,7 +75,7 @@ client.on("inlineQuery", async (ctx) => {
 });
 
 client.on(["chosenInlineResult", "inlineMessageId"], async (ctx) => {
-  const { query } = ctx.chosenInlineResult;
+  const { query, from } = ctx.chosenInlineResult;
   let username = query.split(/\s/).slice(-1)[0];
   const whisper = query.slice(0, username.length * -1).trim();
   username = getUsername(username);
@@ -82,21 +83,32 @@ client.on(["chosenInlineResult", "inlineMessageId"], async (ctx) => {
     username,
     whisper,
     date: new Date(),
+    from,
   });
   whispersMade++;
 });
 
 client.on(["callbackQuery", "inlineMessageId"], async (ctx) => {
-  const { value } = await kv.get<{ whisper: string; username: string }>([
+  const { value } = await kv.get<
+    { whisper: string; username: string; from?: User }
+  >([
     "whispers",
     ctx.callbackQuery.inlineMessageId,
   ]);
   if (value != null) {
     let { whisper, username } = value;
     username = username.toLowerCase();
+    const accesptableUsernames = [
+      username,
+      value.from?.username,
+      ...(value.from?.also ?? []),
+    ];
     if (
-      ctx.from.username?.toLowerCase() !== username &&
-      !ctx.from.also?.map((v) => v.toLowerCase()).includes(username)
+      (!ctx.from.username ||
+        !accesptableUsernames.includes(ctx.from.username)) &&
+      !ctx.from.also?.map((v) => v.toLowerCase()).some((v) =>
+        accesptableUsernames.includes(v)
+      )
     ) {
       await ctx.answerCallbackQuery({
         text: "This is not for you.",
