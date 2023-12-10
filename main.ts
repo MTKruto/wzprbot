@@ -17,7 +17,7 @@ let whispersMade = 0;
 
 const SHRUG = "¯\\_(ツ)_/¯";
 
-const DEV = Deno.env.get("DEBUG") !== undefined;
+const DEV = Deno.env.get("DEV") !== undefined;
 
 client.on("inlineQuery", async (ctx) => {
   let { query } = ctx.inlineQuery;
@@ -30,7 +30,7 @@ client.on("inlineQuery", async (ctx) => {
       title: "No Username Provided",
       description: "Write someone\u2019s username at the end of your message.",
       inputMessageContent: { messageText: SHRUG },
-    }], { cacheTime: DEV ? 0 : 3600 }); // none : 1 hour
+    }], { isPersonal: false, cacheTime: DEV ? 0 : 3600 }); // none : 1 hour
 
     return;
   }
@@ -44,7 +44,7 @@ client.on("inlineQuery", async (ctx) => {
       title: "Invalid Username",
       description: "The username you provided is invalid.",
       inputMessageContent: { messageText: SHRUG },
-    }], { cacheTime: DEV ? 0 : 3600 });
+    }], { isPersonal: false, cacheTime: DEV ? 0 : 3600 });
     return;
   }
 
@@ -58,7 +58,7 @@ client.on("inlineQuery", async (ctx) => {
         whisper.length == 0 ? "short" : "long"
       }.`,
       inputMessageContent: { messageText: SHRUG },
-    }], { cacheTime: DEV ? 0 : 3600 });
+    }], { isPersonal: false, cacheTime: DEV ? 0 : 3600 });
     return;
   }
 
@@ -71,7 +71,7 @@ client.on("inlineQuery", async (ctx) => {
       messageText: `Whisper to ${username.toLowerCase()}`,
     },
     replyMarkup: { inlineKeyboard: [[{ text: "View", callbackData: "view" }]] },
-  }], { cacheTime: DEV ? 0 : 3600 });
+  }], { isPersonal: true, cacheTime: DEV ? 0 : 3600 });
 });
 
 client.on(["chosenInlineResult", "inlineMessageId"], async (ctx) => {
