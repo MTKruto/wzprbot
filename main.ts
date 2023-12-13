@@ -102,10 +102,12 @@ client.on(["callbackQuery", "inlineMessageId"], async (ctx) => {
       username,
       value.from?.username,
       ...(value.from?.also ?? []),
-    ];
+    ].filter((v): v is NonNullable<typeof v> => !!v).map((v) =>
+      v.toLowerCase()
+    );
     if (
       (!ctx.from.username ||
-        !accesptableUsernames.includes(ctx.from.username)) &&
+        !accesptableUsernames.includes(ctx.from.username.toLowerCase())) &&
       !ctx.from.also?.map((v) => v.toLowerCase()).some((v) =>
         accesptableUsernames.includes(v)
       )
