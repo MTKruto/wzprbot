@@ -1,9 +1,5 @@
-import {
-  Client,
-  StorageLocalStorage,
-  User,
-} from "https://deno.land/x/mtkruto@0.1.125/mod.ts";
-import { getUsername } from "https://deno.land/x/mtkruto@0.1.125/client/0_utilities.ts";
+import { Client, StorageLocalStorage, User } from "mtkruto/mod.ts";
+import { getUsername } from "mtkruto/client/0_utilities.ts";
 import env from "./env.ts";
 
 const kv = await Deno.openKv(env.KV_PATH == "" ? undefined : env.KV_PATH);
@@ -74,7 +70,10 @@ client.on("inlineQuery", async (ctx) => {
   }], { isPersonal: true, cacheTime: DEV ? 0 : 3600 });
 });
 
-client.on(["chosenInlineResult", "inlineMessageId"], async (ctx) => {
+client.on("chosenInlineResult", async (ctx) => {
+  if (!ctx.chosenInlineResult.inlineMessageId) {
+    return;
+  }
   const { query, from } = ctx.chosenInlineResult;
   let username = query.split(/\s/).slice(-1)[0];
   const whisper = query.slice(0, username.length * -1).trim();
@@ -88,7 +87,10 @@ client.on(["chosenInlineResult", "inlineMessageId"], async (ctx) => {
   whispersMade++;
 });
 
-client.on(["callbackQuery", "inlineMessageId"], async (ctx) => {
+client.on("callbackQuery", async (ctx) => {
+  if (!ctx.callbackQuery.inlineMessageId) {
+    return;
+  }
   const { value } = await kv.get<
     { whisper: string; username: string; from?: User }
   >([
