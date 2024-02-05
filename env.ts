@@ -1,5 +1,5 @@
-import "https://deno.land/std@0.208.0/dotenv/load.ts";
-import { cleanEnv, num, str } from "https://deno.land/x/envalid@0.1.2/mod.ts";
+import "std/dotenv/load.ts";
+import { cleanEnv, num, str } from "envalid/mod.ts";
 
 export default cleanEnv(Deno.env.toObject(), {
   API_ID: num(),
