@@ -2,6 +2,6 @@
   "imports": {
     "std/": "https://deno.land/std@0.214.0/",
     "envalid/": "https://deno.land/x/envalid@0.1.2/",
-    "mtkruto/": "https://deno.land/x/mtkruto@0.1.149/"
+    "mtkruto/": "https://raw.githubusercontent.com/MTKruto/MTKruto/faa65e4e080609586214a12989432a0b9c7202f6/"
   }
 }

@@ -100,6 +100,7 @@ client.on("callbackQuery", async (ctx) => {
   if (value != null) {
     let { whisper, username } = value;
     username = username.toLowerCase();
+
     const accesptableUsernames = [
       username,
       value.from?.username,
@@ -107,20 +108,24 @@ client.on("callbackQuery", async (ctx) => {
     ].filter((v): v is NonNullable<typeof v> => !!v).map((v) =>
       v.toLowerCase()
     );
-    if (
-      (!ctx.from.username ||
-        !accesptableUsernames.includes(ctx.from.username.toLowerCase())) &&
-      !ctx.from.also?.map((v) => v.toLowerCase()).some((v) =>
+    const usernameAcceptable = (ctx.from.username &&
+      accesptableUsernames.includes(ctx.from.username.toLowerCase())) ||
+      ctx.from.also?.map((v) => v.toLowerCase()).some((v) =>
         accesptableUsernames.includes(v)
-      )
-    ) {
+      );
+    const willBeRead = ctx.from.username?.toLowerCase() === username ||
+      ctx.from.also?.map((v) => v.toLowerCase()).some((v) => v == username);
+    if (!usernameAcceptable) {
       await ctx.answerCallbackQuery({
         text: "This is not for you.",
         alert: true,
       });
     } else {
       await ctx.answerCallbackQuery({ text: whisper, alert: true });
-      await ctx.editInlineMessageText(`${username} viewed the whisper.`);
+      if (willBeRead) {
+        const text = `Whisper to @${username}`;
+        await ctx.editInlineMessageText(text, {entities:[{type:'strikethrough', offset: 0, length:text.length}]});
+      }
     }
   }
 });
