@@ -120,6 +120,7 @@ client.on("callbackQuery", async (ctx) => {
       });
     } else {
       await ctx.answerCallbackQuery({ text: whisper, alert: true });
+      await ctx.editInlineMessageText(`${username} viewed the whisper.`);
     }
   }
 });
