@@ -1,13 +1,9 @@
-import { Client, StorageLocalStorage, User } from "mtkruto/mod.ts";
+import { Client, User } from "mtkruto/mod.ts";
 import { getUsername } from "mtkruto/client/0_utilities.ts";
 import env from "./env.ts";
 
 const kv = await Deno.openKv(env.KV_PATH == "" ? undefined : env.KV_PATH);
-const client = new Client(
-  new StorageLocalStorage("wzpr"),
-  env.API_ID,
-  env.API_HASH,
-);
+const client = new Client(env.AUTH_STRING);
 const startTime = Date.now();
 let whispersMade = 0;
 
@@ -124,7 +120,9 @@ client.on("callbackQuery", async (ctx) => {
       await ctx.answerCallbackQuery({ text: whisper, alert: true });
       if (willBeRead) {
         const text = `Whisper to @${username}`;
-        await ctx.editInlineMessageText(text, {entities:[{type:'strikethrough', offset: 0, length:text.length}]});
+        await ctx.editInlineMessageText(text, {
+          entities: [{ type: "strikethrough", offset: 0, length: text.length }],
+        });
       }
     }
   }
@@ -139,4 +137,4 @@ client.command("stats").filter((ctx) => ctx.chat.id == env.OWNER_ID, (ctx) => {
   );
 });
 
-await client.start(env.BOT_TOKEN);
+await client.start();
