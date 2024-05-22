@@ -3,7 +3,10 @@ import { getUsername } from "mtkruto/client/0_utilities.ts";
 import env from "./env.ts";
 
 const kv = await Deno.openKv(env.KV_PATH == "" ? undefined : env.KV_PATH);
-const client = new Client(env.AUTH_STRING);
+const client = new Client();
+
+await client.importAuthString(env.AUTH_STRING);
+
 const startTime = Date.now();
 let whispersMade = 0;
 
@@ -21,7 +24,7 @@ client.on("inlineQuery", async (ctx) => {
       type: "article",
       title: "No Username Provided",
       description: "Write someone\u2019s username at the end of your message.",
-      messageContent: { messageText: SHRUG },
+      messageContent: { type: "text", text: SHRUG },
     }], { isPersonal: false, cacheTime: DEV ? 0 : 3600 }); // none : 1 hour
 
     return;
@@ -35,7 +38,7 @@ client.on("inlineQuery", async (ctx) => {
       type: "article",
       title: "Invalid Username",
       description: "The username you provided is invalid.",
-      messageContent: { messageText: SHRUG },
+      messageContent: { type: "text", text: SHRUG },
     }], { isPersonal: false, cacheTime: DEV ? 0 : 3600 });
     return;
   }
@@ -49,7 +52,7 @@ client.on("inlineQuery", async (ctx) => {
       description: `The whisper text is too ${
         whisper.length == 0 ? "short" : "long"
       }.`,
-      messageContent: { messageText: SHRUG },
+      messageContent: { type: "text", text: SHRUG },
     }], { isPersonal: false, cacheTime: DEV ? 0 : 3600 });
     return;
   }
@@ -60,7 +63,8 @@ client.on("inlineQuery", async (ctx) => {
     title: `Whisper to ${username.toLowerCase()}`,
     description: whisper,
     messageContent: {
-      messageText: `Whisper to ${username.toLowerCase()}`,
+      type: "text",
+      text: `Whisper to ${username.toLowerCase()}`,
     },
     replyMarkup: { inlineKeyboard: [[{ text: "View", callbackData: "view" }]] },
   }], { isPersonal: true, cacheTime: DEV ? 0 : 3600 });
