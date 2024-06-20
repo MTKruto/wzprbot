@@ -14,10 +14,16 @@ const SHRUG = "¯\\_(ツ)_/¯";
 
 const DEV = Deno.env.get("DEV") !== undefined;
 
+function nextId() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(15))).map((v) =>
+    v.toString(16).toUpperCase().padStart(2, "0")
+  ).join("");
+}
+
 client.on("inlineQuery", async (ctx) => {
   let { query } = ctx.inlineQuery;
   query = query.trim();
-  const username = query.split(/\s/).slice(-1)[0];
+  const username = query.split(/\s/).slice(-1)[0].toLowerCase();
   if (!username.startsWith("@")) {
     await ctx.answerInlineQuery([{
       id: crypto.randomUUID(),
@@ -26,7 +32,6 @@ client.on("inlineQuery", async (ctx) => {
       description: "Write someone\u2019s username at the end of your message.",
       messageContent: { type: "text", text: SHRUG },
     }], { isPersonal: false, cacheTime: DEV ? 0 : 3600 }); // none : 1 hour
-
     return;
   }
 
@@ -57,49 +62,41 @@ client.on("inlineQuery", async (ctx) => {
     return;
   }
 
-  await ctx.answerInlineQuery([{
-    id: crypto.randomUUID(),
-    type: "article",
-    title: `Whisper to ${username.toLowerCase()}`,
-    description: whisper,
-    messageContent: {
-      type: "text",
-      text: `Whisper to ${username.toLowerCase()}`,
-    },
-    replyMarkup: { inlineKeyboard: [[{ text: "View", callbackData: "view" }]] },
-  }], { isPersonal: true, cacheTime: DEV ? 0 : 3600 });
-});
-
-client.on("chosenInlineResult", async (ctx) => {
-  if (!ctx.chosenInlineResult.inlineMessageId) {
-    return;
-  }
-  const { query, from } = ctx.chosenInlineResult;
-  let username = query.split(/\s/).slice(-1)[0];
-  const whisper = query.slice(0, username.length * -1).trim();
-  username = getUsername(username);
-  await kv.set(["whispers", ctx.chosenInlineResult.inlineMessageId], {
+  const id = nextId();
+  await kv.set(["whispers", id], {
     username,
     whisper,
     date: new Date(),
-    from,
+    from: ctx.inlineQuery.from,
   });
-  whispersMade++;
+  ++whispersMade;
+
+  await ctx.answerInlineQuery([{
+    id: crypto.randomUUID(),
+    type: "article",
+    title: `Whisper to ${username}`,
+    description: whisper,
+    messageContent: {
+      type: "text",
+      text: `Whisper to ${username}`,
+    },
+    replyMarkup: { inlineKeyboard: [[{ text: "View", callbackData: id }]] },
+  }], { isPersonal: true, cacheTime: DEV ? 0 : 3600 });
 });
 
 client.on("callbackQuery", async (ctx) => {
-  if (!ctx.callbackQuery.inlineMessageId) {
+  if (!ctx.callbackQuery.inlineMessageId || !ctx.callbackQuery.data) {
     return;
   }
   const { value } = await kv.get<
     { whisper: string; username: string; from?: User }
   >([
     "whispers",
-    ctx.callbackQuery.inlineMessageId,
+    ctx.callbackQuery.data,
   ]);
   if (value != null) {
     let { whisper, username } = value;
-    username = username.toLowerCase();
+    username = username.toLowerCase().slice(1);
 
     const accesptableUsernames = [
       username,
@@ -115,6 +112,7 @@ client.on("callbackQuery", async (ctx) => {
       );
     const willBeRead = ctx.from.username?.toLowerCase() === username ||
       ctx.from.also?.map((v) => v.toLowerCase()).some((v) => v == username);
+
     if (!usernameAcceptable) {
       await ctx.answerCallbackQuery({
         text: "This is not for you.",
