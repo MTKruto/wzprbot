@@ -1,5 +1,5 @@
-import { Client, User } from "mtkruto/mod.ts";
-import { getUsername } from "mtkruto/client/0_utilities.ts";
+import { Client, User } from "@mtkruto/mtkruto";
+import { getUsername } from "./util.ts";
 import env from "./env.ts";
 
 const kv = await Deno.openKv(env.KV_PATH == "" ? undefined : env.KV_PATH);
