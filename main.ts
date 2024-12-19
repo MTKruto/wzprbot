@@ -108,7 +108,7 @@ client.on("callbackQuery", async (ctx) => {
   if (value != null) {
     let { whisper, username } = value;
     username = username.toLowerCase().slice(1);
-    const id = Number(username.slice(1)) || 0;
+    const id = Number(username) || 0;
 
     const accesptableUsernames = [
       username,
@@ -134,7 +134,8 @@ client.on("callbackQuery", async (ctx) => {
     } else {
       await ctx.answerCallbackQuery({ text: whisper, alert: true });
       if (willBeRead) {
-        const text = `Whisper to @${username}`;
+        const target = id ? `user with the ID ${id}` : "@" + username;
+        const text = `Whisper to ${target}`;
         await ctx.editInlineMessageText(text, {
           entities: [{ type: "strikethrough", offset: 0, length: text.length }],
         });
