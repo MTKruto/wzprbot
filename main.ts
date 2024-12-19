@@ -35,13 +35,17 @@ client.on("inlineQuery", async (ctx) => {
     return;
   }
 
+  let wasId = false;
   try {
     const withoutAt = username.slice(1);
     if (
       !/^[0-9]+$/.test(withoutAt) ||
-      String(withoutAt) != String(Number(withoutAt))
+      String(withoutAt) != String(Number(withoutAt)) &&
+        Number(withoutAt) >= 1
     ) {
       getUsername(username);
+    } else {
+      wasId = true;
     }
   } catch {
     await ctx.answerInlineQuery([{
@@ -77,14 +81,15 @@ client.on("inlineQuery", async (ctx) => {
   });
   ++whispersMade;
 
+  const target = wasId ? `User with the ID ${username.slice(1)}` : username;
   await ctx.answerInlineQuery([{
     id: crypto.randomUUID(),
     type: "article",
-    title: `Whisper to ${username}`,
+    title: `Whisper to ${target}`,
     description: whisper,
     messageContent: {
       type: "text",
-      text: `Whisper to ${username}`,
+      text: `Whisper to ${target}`,
     },
     replyMarkup: { inlineKeyboard: [[{ text: "View", callbackData: id }]] },
   }], { isPersonal: true, cacheTime: DEV ? 0 : 3600 });
