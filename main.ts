@@ -36,7 +36,13 @@ client.on("inlineQuery", async (ctx) => {
   }
 
   try {
-    getUsername(username);
+    const withoutAt = username.slice(1);
+    if (
+      !/^[0-9]+$/.test(withoutAt) ||
+      String(withoutAt) != String(Number(withoutAt))
+    ) {
+      getUsername(username);
+    }
   } catch {
     await ctx.answerInlineQuery([{
       id: crypto.randomUUID(),
@@ -97,6 +103,7 @@ client.on("callbackQuery", async (ctx) => {
   if (value != null) {
     let { whisper, username } = value;
     username = username.toLowerCase().slice(1);
+    const id = Number(username.slice(1)) || 0;
 
     const accesptableUsernames = [
       username,
@@ -109,7 +116,7 @@ client.on("callbackQuery", async (ctx) => {
       accesptableUsernames.includes(ctx.from.username.toLowerCase())) ||
       ctx.from.also?.map((v) => v.toLowerCase()).some((v) =>
         accesptableUsernames.includes(v)
-      );
+      ) || ctx.from.id == id;
     const willBeRead = ctx.from.username?.toLowerCase() === username ||
       ctx.from.also?.map((v) => v.toLowerCase()).some((v) => v == username);
 
