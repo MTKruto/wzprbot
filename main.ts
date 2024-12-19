@@ -81,7 +81,7 @@ client.on("inlineQuery", async (ctx) => {
   });
   ++whispersMade;
 
-  const target = wasId ? `User with the ID ${username.slice(1)}` : username;
+  const target = wasId ? `user with the ID ${username.slice(1)}` : username;
   await ctx.answerInlineQuery([{
     id: crypto.randomUUID(),
     type: "article",

@@ -68,10 +68,16 @@ export function getUsername(string: string) {
   if (url === null || (url.protocol != "http:" && url.protocol != "https:")) {
     return validateUsername(string, true);
   }
-  if (url.hostname != "telegram.dog" && url.hostname != "telegram.me" && url.hostname != "t.me" && !url.hostname.endsWith(".t.me")) {
+  if (
+    url.hostname != "telegram.dog" && url.hostname != "telegram.me" &&
+    url.hostname != "t.me" && !url.hostname.endsWith(".t.me")
+  ) {
     return validateUsername(string, true);
   }
-  if (url.hostname == "telegram.dog" || url.hostname == "telegram.me" || url.hostname == "t.me") {
+  if (
+    url.hostname == "telegram.dog" || url.hostname == "telegram.me" ||
+    url.hostname == "t.me"
+  ) {
     return validateUsername(url.pathname.split("/")[1]);
   }
   const parts = url.hostname.split(".");
