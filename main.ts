@@ -117,12 +117,13 @@ client.on("callbackQuery", async (ctx) => {
     ].filter((v): v is NonNullable<typeof v> => !!v).map((v) =>
       v.toLowerCase()
     );
-    const usernameAcceptable = (ctx.from.username &&
+    const usernameAcceptable = ctx.from.id == id || (ctx.from.username &&
       accesptableUsernames.includes(ctx.from.username.toLowerCase())) ||
       ctx.from.also?.map((v) => v.toLowerCase()).some((v) =>
         accesptableUsernames.includes(v)
-      ) || ctx.from.id == id;
-    const willBeRead = ctx.from.username?.toLowerCase() === username ||
+      );
+    const willBeRead = ctx.from.id == id ||
+      ctx.from.username?.toLowerCase() === username ||
       ctx.from.also?.map((v) => v.toLowerCase()).some((v) => v == username);
 
     if (!usernameAcceptable) {
