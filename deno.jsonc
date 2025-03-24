@@ -1,7 +1,7 @@
 {
   "lock": false,
   "imports": {
-    "@mtkruto/mtkruto": "jsr:@mtkruto/mtkruto@^0.6.3",
+    "@mtkruto/mtkruto": "jsr:@mtkruto/mtkruto@^0.63.11",
     "@std/dotenv": "jsr:@std/dotenv@^0.225.2",
     "envalid": "npm:envalid@^8.0.0"
   }
